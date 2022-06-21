@@ -1,12 +1,13 @@
 /* Coding Assignment 1 */
 // Edward Alkire - 1001722331
+// Linked list implementation
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
 
-#define MAX 100
+#define MAX 1024
 
 typedef struct node
 {
@@ -17,9 +18,10 @@ NODE;
 
 void AddNodeToLL(int num_, NODE **llh_)
 {
-	NODE *temp, *NewNode;
-	temp = *llh_; //llh is pointing to a pointer to the head node
-	NewNode = malloc(sizeof(NODE));
+	NODE *temp = NULL;
+    NODE *NewNode = NULL;
+    temp = *llh_;
+    NewNode = (NODE *)malloc(sizeof(NODE));
 	NewNode->number = num_;
 	NewNode->next_ptr = NULL;
 
@@ -30,7 +32,6 @@ void AddNodeToLL(int num_, NODE **llh_)
 	}
 	//add new node to end of LL
 	temp->next_ptr = NewNode;
-
 }
 
 void ReadFileIntoLL(int argc,  char *argv[], NODE **LLH, int *nodeCountPtr, int *sumPtr)
@@ -43,7 +44,7 @@ void ReadFileIntoLL(int argc,  char *argv[], NODE **LLH, int *nodeCountPtr, int 
 	if(!fp)
 	{
 		printf("\nError opening file...exiting\n");
-		return -1;
+		exit(1);
 	}
 
 	while((fgets(buf, sizeof(buf), fp)))
@@ -58,10 +59,10 @@ void ReadFileIntoLL(int argc,  char *argv[], NODE **LLH, int *nodeCountPtr, int 
 
 void PrintLL(NODE *LLH)
 {
-	NODE *temp = LLH;
+	NODE *temp = LLH->next_ptr;
 	while(temp)
 	{
-		printf("\n%d %d %d\n", temp, temp->number, temp->next_ptr);
+		printf("\n%p %d %p\n", temp, temp->number, temp->next_ptr);
 		temp = temp->next_ptr;
 	}
 }
@@ -69,12 +70,13 @@ void PrintLL(NODE *LLH)
 void FreeLL(NODE **LLH) 
 {
 	NODE *temp = *LLH;
+    temp = temp->next_ptr;
 	NODE *temp2 = temp;
 	while(temp)
 	{
 		temp2 = temp;
 		#ifdef PRINT
-		printf("\nFreeing %d %d %d\n", temp2, temp2->number, temp2->next_ptr);
+		printf("\nFreeing %p %d %p\n", temp2, temp2->number, temp2->next_ptr);
 		#endif
 		temp = temp->next_ptr;
 		free(temp2);
@@ -82,26 +84,19 @@ void FreeLL(NODE **LLH)
 	*LLH = NULL;
 }
 
-
-/*
-Create a program than can open a file listed on the command line,
-read through that file, 
-write each line from the file into a linked list, 
-print the linked list
-and free the linked list.
-You will time each step and count and sum during each step.
-*/
-
 int main(int argc, char *argv[]) 
 {
 	NODE *LLH = NULL;
+    LLH = (NODE *)malloc(sizeof(NODE));
+    LLH->number = 0;
+    LLH->next_ptr = NULL;
+
 	int sum=0;
 	int nCount=0;
 	int *nodeCountPtr = &nCount;
 	int *sumPtr = &sum;
 	clock_t start, end;
 
-	//^^use for getting sum and count later
 
 	if(argc == 1)
 	{
@@ -109,36 +104,28 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 	
-	/* capture the clock in a start time */
 	start = clock();
 	ReadFileIntoLL(argc, argv, &LLH, nodeCountPtr, sumPtr);
-	/* capture the clock in an end time */
 	end = clock();
 	printf("\n%d records were read for a total sum of %d\n", nCount, sum);
 	printf("\n%ld tics to write the file into the linked list\n", end-start);
 
 	#ifdef PRINT
-	/* capture the clock in a start time */
 	start = clock();
 	PrintLL(LLH);
-	/* capture the clock in an end time */
 	end = clock();
 	printf("\n%d records were read for a total sum of %d\n", nCount, sum);
 	printf("\n%ld tics to print the linked list\n", end-start);
 	#endif
 	
-	
-	/* capture the clock in a start time */
 	start = clock();
 	FreeLL(&LLH);
-	/* capture the clock in an end time */
 	end = clock();
 	printf("\n%d nodes were deleted for a total sum of %d\n", nCount, sum);
 	printf("\n%ld tics to free the linked list\n", end-start);
 	
-	free(nodeCountPtr);
-	free(sumPtr);
-	free(LLH);
+	nodeCountPtr=NULL;
+	sumPtr=NULL;
 
 	return 0; 
-} 
+}
